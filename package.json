@@ -1,0 +1,28 @@
+{
+  "name": "api-rest",
+  "version": "1.0.0",
+  "description": "api-de-testes",
+  "main": "index.js",
+  "author": "Gadiel Kalleb",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "moment": "^2.22.2",
+    "mongoose": "^5.2.1",
+    "nodemailer": "^4.6.7",
+    "nodemailer-express-handlebars": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "nodemon": "^1.17.5"
+  }
+}
