@@ -9,9 +9,7 @@ const router = express.Router()
 const authController = require(path.resolve('./app/controllers/authController'))
 
 router.post('/register', authController.register)
-
 router.post('/authenticate', authController.authenticate)
-
 router.post('/forgot_password', authController.forgot_password)
 
 module.exports = router

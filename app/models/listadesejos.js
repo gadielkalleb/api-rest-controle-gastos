@@ -1,6 +1,7 @@
 const path = require('path')
 
 const mongoose = require(path.resolve('./db'))
+
 const ListaDesejosSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
@@ -9,7 +10,7 @@ const ListaDesejosSchema = new mongoose.Schema({
   },
   produto: [{
     nome: { type: String },
-    valor: { type: Number },
+    valor: { type: String },
     urllojaoficial: { type: String },
     urllojaalternativa: { type: String },
     ultimaconsulta: { type: Date },
