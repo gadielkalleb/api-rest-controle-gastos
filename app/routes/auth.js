@@ -14,4 +14,5 @@ router.post('/authenticate', authController.authenticate)
 
 router.post('/forgot_password', authController.forgot_password)
 
-module.exports = app => app.use('/auth', router)
+module.exports = router
+// module.exports = app => app.use('/auth', router)

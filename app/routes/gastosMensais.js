@@ -14,11 +14,9 @@ const gmController = require(path.resolve('./app/controllers/gastosMensaisContro
 
 router.use(authMiddleware)
 
-/**
- * rota de para salvar gastos
- */
 router.post('/save', gmController.save)
 
 router.get('/show', gmController.show)
 
-module.exports = app => app.use('/gastosmensais', router)
+module.exports = router
+// module.exports = app => app.use('/gastosmensais', router)
