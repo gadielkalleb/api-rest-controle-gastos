@@ -1,60 +1,56 @@
 const cheerio = require('cheerio')
 const request = require('request')
-const mongoose = require('mongoose');
+const EventEmitter = require('events');
 
-mongoose.connect('mongodb://localhost:27017/api-rest', { useNewUrlParser: true });
-mongoose.Promise = global.Promise;
+const event = new EventEmitter()
 
-const ListaDesejosSchema = new mongoose.Schema({
-  // user: {
-  //   type: mongoose.Schema.ObjectId,
-  //   ref: 'user',
-  //   required: true,
-  // },
-
-    nome: { type: String },
-    valor: { type: String },
-    urllojaoficial: { type: String },
-    urllojaalternativa: { type: String },
-    ultimaconsulta: { type: Date },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-})
-
-const list = mongoose.model('ListaDesejos', ListaDesejosSchema)
-
-const produtos = {
-  dell: {
-    url: 'https://www.dell.com/pt-br/shop/ofertas/dell-g3-15/spd/g-series-15-3579-laptop/cag3579w10h191421brw',
-    title: 'Dell G3 15',
-    idTitle: '#sharedPdPageProductTitle',
-    classTitle: '.hidePageTitle',
-    idPrice: '#starting-price',
-  },
+const isScrapProduto = prd => prd.isScraping
+const produtoFilter = data => data.produto.filter(isScrapProduto)
+const updateProduct = async (model, modelToSave) => {
+  try {
+    const updateModel = await model.update({
+      _id: modelToSave.id,
+    }, {
+      $set: {
+        valor: modelToSave.valor,
+      },
+    })
+    console.log(`Valores atualizados com o scraping: ${updateModel}`)
+  } catch (e) {
+    console.log(`Não foi possivel fazer o update dos dados do scraping: ${e}`)
+  }
 }
 
-request(produtos.dell.url, async (err, response, html) => {
-  console.log('====>>>>> iniciei a pesquisa!!!');
-  if (err) {
-    console.log(err)
-  } else {
-    const $ = await cheerio.load(html)
-    const titulo = $(`${produtos.dell.idTitle}${produtos.dell.classTitle}`).text().trim()
-    const valor = $(`${produtos.dell.idPrice}`).text().trim().split(',')[0]
-    try {
-      const save = await list.create({
-        nome: titulo,
-        valor,
-        url: produtos.dell.url,
-        ultimaconsulta: Date.now(),
-      })
-      console.log(save)
-    } catch (e) {
-      console.log(e)
+module.exports = (data, listModel) => {
+  const produto = produtoFilter(data)
+  request(produto.url, async (err, response, html) => {
+    const modelToSave = {}
+    if (err) {
+      console.log(err)
+    } else {
+      try {
+        const $ = await cheerio.load(html)
+        if ((!$(`${produto.idTitle}${produto.classTitle}`)) && ($(`${produto.idTitle}${produto.classTitle}`) !== produto.nome)) {
+          return res.status(404).send({
+            ok: false,
+            message: 'Nome do produto não confere, por favor revise os dados no site do produto',
+            url: produto.url,
+          })
+        }
+        if (!$(`${produto.idPrice}`)) {
+          return res.status(404).send({
+            ok: false,
+            message: 'Valor não encontrado, por favor revise o site do produto',
+            url: produto.url,
+          })
+        }
+        modelToSave.nome = await $(`${produto.idTitle}${produto.classTitle}`).text().trim()
+        modelToSave.valor = await $(`${produto.idPrice}`).text().trim()
+        modelToSave.url = produto.url
+        updateProduct(listModel, modelToSave)
+      } catch (error) {
+        console.log(`Error ao fazer o Scraping: ${error}`)
+      }
     }
-  }
-  console.log('====>>>>> finalizei a pesquisa!!!');
-})
+  })
+}

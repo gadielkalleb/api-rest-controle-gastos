@@ -1,6 +1,6 @@
 const path = require('path')
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require('express')
+const bodyParser = require('body-parser')
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -8,7 +8,6 @@ const port = process.env.PORT || 3000;
 const auth = require(path.resolve('./app/routes/auth'))
 const gastosMensais = require(path.resolve('./app/routes/gastosMensais'))
 const listaDesejos = require(path.resolve('./app/routes/listadesejos'))
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
