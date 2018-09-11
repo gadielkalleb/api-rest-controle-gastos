@@ -2,6 +2,8 @@ const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
 
+const scraping = require('./app/middlewares/scraping')
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -17,6 +19,9 @@ app.use(bodyParser.urlencoded({
 app.use('/auth', auth)
 app.use('/gastosmensais', gastosMensais)
 app.use('/listadesejos', listaDesejos)
-// require(path.resolve('./app/routes/'))(app);
 
-app.listen(port, () => console.log(`escutando na porta ${port}`));
+setInterval(() => {
+  scraping()
+}, 1000);
+
+app.listen(port, () => console.log(`escutando na porta ${port}`))

@@ -3,8 +3,6 @@ const path = require('path')
 
 const router = express.Router()
 
-const ListaDesejos = require(path.resolve('./app/models/listadesejos'))
-
 const { saveProduto, getProduto } = require('../controllers/listadesejosController')
 
 /**

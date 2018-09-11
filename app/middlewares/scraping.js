@@ -1,18 +1,16 @@
 const cheerio = require('cheerio')
 const request = require('request')
-const EventEmitter = require('events');
 
-const event = new EventEmitter()
+const listModel = require('../models/listadesejos')
 
-const isScrapProduto = prd => prd.isScraping
-const produtoFilter = data => data.produto.filter(isScrapProduto)
-const updateProduct = async (model, modelToSave) => {
+const updateProduct = async (modelToSave) => {
   try {
-    const updateModel = await model.update({
+    const updateModel = await listModel.update({
       _id: modelToSave.id,
     }, {
       $set: {
         valor: modelToSave.valor,
+        message: modelToSave.message,
       },
     })
     console.log(`Valores atualizados com o scraping: ${updateModel}`)
@@ -21,36 +19,43 @@ const updateProduct = async (model, modelToSave) => {
   }
 }
 
-module.exports = (data, listModel) => {
-  const produto = produtoFilter(data)
-  request(produto.url, async (err, response, html) => {
-    const modelToSave = {}
-    if (err) {
-      console.log(err)
-    } else {
-      try {
-        const $ = await cheerio.load(html)
-        if ((!$(`${produto.idTitle}${produto.classTitle}`)) && ($(`${produto.idTitle}${produto.classTitle}`) !== produto.nome)) {
-          return res.status(404).send({
-            ok: false,
-            message: 'Nome do produto não confere, por favor revise os dados no site do produto',
-            url: produto.url,
-          })
+const data = async () => {
+  try {
+    const getProduto = await listModel.find({})
+    console.log(getProduto)
+    return getProduto
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+module.exports = () => {
+  // const produto = data.filter(prd => prd.isScraping === true)
+
+  for (let i = 0; data.length; i++) {
+    request(data.url, async (err, response, html) => {
+      if (err) {
+        console.log(err)
+      } else {
+        const modelToSave = {}
+        try {
+          const $ = await cheerio.load(html)
+          if ((!$(`${data.idTitle}${data.classTitle}`)) && ($(`${data.idTitle}${data.classTitle}`) !== data.nome)) {
+            modelToSave.message = 'Nome do produto não confere, por favor revise os dados no site do produto'
+          }
+          if (!$(`${data.idPrice}`)) {
+            modelToSave.message = 'Valor não encontrado, por favor revise o site do produto'
+          }
+          modelToSave.nome = $(`${data.idTitle}${data.classTitle}`).text().trim()
+          modelToSave.valor = data.valor !== $(`${data.idPrice}`).text().trim() ? $(`${data.idPrice}`).text().trim() : data.valor
+          modelToSave.url = data.url
+          modelToSave.valorantigo = data.valor !== $(`${data.idPrice}`).text().trim() ? data.valor : $(`${data.idPrice}`).text().trim()
+          modelToSave.ultimaconsulta = Date.now()
+          updateProduct(modelToSave)
+        } catch (error) {
+          console.log(`Error ao fazer o Scraping: ${error}`)
         }
-        if (!$(`${produto.idPrice}`)) {
-          return res.status(404).send({
-            ok: false,
-            message: 'Valor não encontrado, por favor revise o site do produto',
-            url: produto.url,
-          })
-        }
-        modelToSave.nome = await $(`${produto.idTitle}${produto.classTitle}`).text().trim()
-        modelToSave.valor = await $(`${produto.idPrice}`).text().trim()
-        modelToSave.url = produto.url
-        updateProduct(listModel, modelToSave)
-      } catch (error) {
-        console.log(`Error ao fazer o Scraping: ${error}`)
       }
-    }
-  })
+    })
+  }
 }

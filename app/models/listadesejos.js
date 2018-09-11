@@ -10,6 +10,9 @@ const ListaDesejosSchema = new mongoose.Schema({
   },
   nome: { type: String },
   valor: { type: String },
+  valorAntigo: [{
+    valor: String,
+  }],
   urllojaoficial: { type: String },
   urllojaalternativa: { type: String },
   idTitle: { type: String },
@@ -17,6 +20,7 @@ const ListaDesejosSchema = new mongoose.Schema({
   idPrice: { type: String },
   isScraping: { type: Boolean },
   ultimaconsulta: { type: Date },
+  message: String,
   createdAt: {
     type: Date,
     default: Date.now,
