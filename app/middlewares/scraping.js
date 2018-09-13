@@ -3,6 +3,14 @@ const request = require('request')
 
 const listModel = require('../models/listadesejos')
 
+// const sendJSON = ( res ) => ( result )  => res.json( res )
+// const logError = ( res ) => ( result ) => console.log( res )
+
+// const callback = ( res ) => ({
+//   try: sendJSON( res ),
+//   catch: logError( res )
+// })
+
 const updateProduct = async (modelToSave) => {
   try {
     const updateModel = await listModel.update({
@@ -30,8 +38,6 @@ const data = async () => {
 }
 
 module.exports = () => {
-  // const produto = data.filter(prd => prd.isScraping === true)
-
   for (let i = 0; data.length; i++) {
     request(data.url, async (err, response, html) => {
       if (err) {
