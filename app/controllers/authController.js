@@ -7,27 +7,27 @@ const User = require(path.resolve('./app/models/user'))
 const authConfig = require(path.resolve('./config/auth.json'))
 const mailer = require(path.resolve('./modules/mailer'))
 
+const tryAwait = require('../middlewares/tryAwait')
+
 function generateToken(params = {}) {
   return jwt.sign(params, authConfig.secret, {
     expiresIn: 86400,
   })
 }
 
+const callback = (res) => ({
+  try: (result) => {
+    const r = result
+    r.password = undefined
+    return res.status(200).send({ result: r, token: generateToken({ id: r.id }) })
+  },
+  catch: (err) => res.status(400).send({ error: 'registration failed', err }),
+})
+
 exports.register = async (req, res) => {
   const { email } = req.body
-  try {
-    if (await User.findOne({ email })) return res.status(400).send({ error: 'User already exists' })
-    const user = await User.create(req.body)
-    user.password = undefined
-    return res.send({
-      user,
-      token: generateToken({ id: user.id }),
-    })
-  } catch (err) {
-    return res.status(400).send({
-      error: 'registration failed',
-    })
-  }
+  if (await User.findOne({ email })) return res.status(400).send({ error: 'User already exists' })
+  tryAwait(User.create(req.body), callback(res))
 }
 
 exports.authenticate = async (req, res) => {

@@ -10,13 +10,14 @@ const authMiddleware = require(path.resolve('./app/middlewares/auth'))
  * @description controller para as rotas de gasto mensal
  */
 const gmController = require(path.resolve('./app/controllers/gastosMensaisController'))
-
+/**
+ * @description model de Despesas
+ */
+const Despesas = require(path.resolve('./app/models/despesas'))
 
 router.use(authMiddleware)
 
-router.post('/save', gmController.save)
-
-router.get('/show', gmController.show)
+router.post('/save', gmController.save.bind(null, Despesas))
+router.get('/show', gmController.show.bind(null, Despesas))
 
 module.exports = router
-// module.exports = app => app.use('/gastosmensais', router)
